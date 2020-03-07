@@ -29,6 +29,9 @@ public:
     static TypeSpec *boolean_type;
     static TypeSpec *char_type;
     static TypeSpec *undefined_type;
+    static TypeSpec *complex_type;
+    // static TypeSpec *complex_re_type;
+    // static TypeSpec *complex_im_type;
 
     // Predefined identifiers.
     static SymTabEntry *integer_id;
@@ -37,6 +40,9 @@ public:
     static SymTabEntry *char_id;
     static SymTabEntry *false_id;
     static SymTabEntry *true_id;
+    static SymTabEntry *complex_id;
+    static SymTabEntry *complex_re_id;
+    static SymTabEntry *complex_im_id;
 
     /**
      * Initialize a symbol table stack with predefined identifiers.

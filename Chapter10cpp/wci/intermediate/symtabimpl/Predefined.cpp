@@ -31,6 +31,9 @@ TypeSpec *Predefined::real_type;
 TypeSpec *Predefined::boolean_type;
 TypeSpec *Predefined::char_type;
 TypeSpec *Predefined::undefined_type;
+TypeSpec *Predefined::complex_type;
+// TypeSpec *Predefined::complex_re_type;
+// TypeSpec *Predefined::complex_im_type;
 
 // Predefined identifiers.
 SymTabEntry *Predefined::integer_id;
@@ -39,6 +42,9 @@ SymTabEntry *Predefined::boolean_id;
 SymTabEntry *Predefined::char_id;
 SymTabEntry *Predefined::false_id;
 SymTabEntry *Predefined::true_id;
+SymTabEntry *Predefined::complex_id;
+SymTabEntry *Predefined::complex_re_id;
+SymTabEntry *Predefined::complex_im_id;
 
 void Predefined::initialize(SymTabStack *symtab_stack)
 {
@@ -80,6 +86,28 @@ void Predefined::initialize_types(SymTabStack *symtab_stack)
     char_id->set_definition((Definition) DF_TYPE);
     char_id->set_typespec(char_type);
 
+    // Type complex.
+    complex_id = symtab_stack->enter_local("complex");
+    complex_type = TypeFactory::create_type((TypeForm) TF_RECORD);
+
+    complex_type->set_identifier(complex_id);
+    complex_id->set_definition((Definition) DF_TYPE);
+    complex_id->set_typespec(complex_type);
+
+    // // Type re.
+    // re_id = symtab_stack->enter_local("complex_re");
+    // re_type = TypeFactory::create_type((TypeForm) TF_SCALAR);
+    // re_type->set_identifier(complex_re_id);
+    // re_id->set_definition((Definition) DF_TYPE);
+    // re_id->set_typespec(complex_re_type);
+    //
+    // // Type im.
+    // im_id = symtab_stack->enter_local("complex_im");
+    // im_type = TypeFactory::create_type((TypeForm) TF_SCALAR);
+    // im_type->set_identifier(complex_im_id);
+    // im_id->set_definition((Definition) DF_TYPE);
+    // im_id->set_typespec(complex_im_type);
+
     // Undefined type.
     undefined_type = TypeFactory::create_type((TypeForm) TF_SCALAR);
 }
@@ -103,5 +131,11 @@ void Predefined::initialize_constants(SymTabStack *symtab_stack)
     constants->push_back(false_id);
     constants->push_back(true_id);
     boolean_type->set_enumeration_constants(constants);
+
+    // Add false and true to the boolean enumeration type.
+    // vector<SymTabEntry *> *integers = new vector<SymTabEntry *>();
+    // integers->push_back(re_id);
+    // integers->push_back(im_id);
+    // complex_type->set_enumeration_constants(integers);
 }
 }}}  // namespace wci::intermediate::symtabimpl
