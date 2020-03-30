@@ -1,0 +1,19 @@
+1961 1963 John  Kennedy
+1963 1969 Lyndon  Johnson
+1969 1974 Richard  Nixon
+1974 1977 Gerald  Ford
+1977 1981 Jimmy  Carter
+1981 1989 Ronald  Reagan
+1989 1993 George H.W. Bush
+1993 2001 Bill  Clinton
+2001 2009 George W. Bush
+2009 2017 Barack  Obama
+1975 Gerald  Ford
+1963 John  Kennedy
+1963 Lyndon  Johnson
+1989 Ronald  Reagan
+1989 George H.W. Bush
+2019 No President records found for this year.
+2001 Bill  Clinton
+2001 George W. Bush
+2016 Barack  Obama
