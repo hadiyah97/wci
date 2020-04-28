@@ -1,0 +1,31 @@
+BAtDAu sampleProgram
+
+MAIN 
+{
+	Integer x, Y ,Z ;
+	Boolean a;
+	
+	x = 3;
+	a = T;
+	
+	LAP(x == 5)
+	{
+		x = x+1;
+	};
+	
+	NeU(T == A)
+	{
+		T = 5;
+	};
+
+	khi(x == 5)
+	{
+		x = 0;
+	};
+	
+	
+	
+	
+}
+
+KETTHUC
