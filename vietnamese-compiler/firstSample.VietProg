@@ -1,0 +1,34 @@
+batdau SampleProgram:
+
+giupdo G_functionName (T_integer H_firstVariable, T_boolean H_secondVariable)
+{
+	T_float H_apple;
+	H_apple <- 34.5;
+	INRA('This is a print statement. %f', H_apple);
+}
+ 
+viecchinh
+{
+	T_integer H_mango; 
+	T_float H_oranges;
+	H_mango <- 45;
+	H_oranges <- -7890;
+	
+	KHI (H_oranges >= 44)
+	{
+		H_oranges <- (H_mango - 1);
+	};
+	
+	LAP (H_mango =? -90)
+	{
+		NEU (5 =? 6)
+	 	{
+	 		H_mango <- -90;
+	 	};
+	};
+	
+	T_boolean H_lies;
+	
+	G_functionName(H_mango, H_lies);
+}
+ketthuc
