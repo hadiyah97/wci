@@ -19,10 +19,26 @@
 #include "VietProgLexer.h"
 #include "VietProgParser.h"
 #include "FirstVisitor.h"
+#include "SecondVisitor.h"
 
 using namespace antlrcpp;
 using namespace antlr4;
 using namespace std;
+
+
+/*
+giupdo G_functionName (T_integer H_firstVariable, T_boolean H_secondVariable)
+{
+	T_float H_apple;
+	H_apple <- 34.5;
+	INRA('This is a print statement. %f', H_apple);
+
+
+	G_functionName(H_mango, H_lies);
+}
+*/
+
+
 
 int main(int argc, const char *args[])
 {
@@ -54,7 +70,10 @@ int main(int argc, const char *args[])
 	cout << endl << "Parse tree (Lisp format):" << endl;
 	std::cout << tree->toStringTree(&parser) << endl;
 
-	FirstVisitor *pass2 = new FirstVisitor();
+	FirstVisitor *pass1 = new FirstVisitor();
+	pass1->visit(tree);
+
+	SecondVisitor *pass2 = new SecondVisitor();
 	pass2->visit(tree);
 
 	return 0;

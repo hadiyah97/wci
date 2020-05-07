@@ -1,4 +1,4 @@
-grammar VietProg; 
+grammar VietProg;  // procedural language written in Vietnamese.
 
 @header {
 #include "wci/intermediate/TypeSpec.h"
@@ -14,12 +14,15 @@ using namespace wci::intermediate;
 // VIECCHINH - main task
 // GIUPDO - helper
 // CONSO - number
-// HUDUNG - container (for variables) - dont need this
+// HUDUNG - container (for variables)
 // replace equals with <-
 // replace == with =?
 
 
 program		: START PROGRAM_IDENTIFIER ':' (|function_list) main END;
+
+main		: declarations MAIN compound_statement ;
+
 function_list	: function (function)* ;
 
 function	locals [ TypeSpec *type = nullptr ]
@@ -31,11 +34,11 @@ parameter	locals [ TypeSpec *type = nullptr ]
 			: type_id var_id
 			| type_id var_id REFERENCE
 			;
-			
-main		: MAIN compound_statement ;
 
-declarations: type_id var_list;
-var_list	: var_id ( ',' var_id )* ;
+declarations		: HUDUNG ':' declaration_list '.';
+declaration_list	: declaration ( ';' declaration)* ;
+declaration			: type_id var_list;
+var_list			: var_id ( ',' var_id )* ;
 var_id locals [ TypeSpec *type = nullptr ] 	: VAR_IDENTIFIER ;
 type_id	locals [ TypeSpec *type = nullptr ]	: TYPE_IDENTIFIER ;
 
@@ -52,76 +55,77 @@ statement	: compound_statement
 			| print_statement
 			|                	
 			;
+			
 statement_list 				: statement ( ';' statement )* ;
-function_call_statement   	: function_name '(' var_list ')';     
-assignment_statement 		: var_id EQ_OP expr ;
+assignment_statement 		: variable EQ_OP expr ;
 loop_statement  			: LOOP '(' expr relational_operation expr ')' statement ;
 when_statement       		: WHEN '(' expr relational_operation expr ')' statement ;
 if_statement         		: IF expr statement;
+function_call_statement   	: function_name '(' variable_list ')';
 print_statement				: PRINT '(' format_string print_arg* ')' ;
+
 format_string				: STRING ;
 print_arg					: ',' expr ;
 
-//variable : IDENTIFIER ;
+//variable locals [ TypeSpec *type = nullptr ]
+//	: VAR_IDENTIFIER ;
+
+variable : VAR_IDENTIFIER ;
+	
+variable_list	: variable ( ',' variable)*;
 
 expr locals [ TypeSpec *type = nullptr ]
 	 : expr mul_div_operation expr		# mul_Div_Expr
      | expr add_sub_operation expr		# add_Sub_Expr
      | expr relational_operation expr	# relational_Expr
      | number                   		# number_Const_Expr
+     | variable               			# variable_Expr
+     | '(' expr ')'             		# paren_Expr	
      | STRING							# string
-     | BOOLEAN							# boolean
-     | VAR_IDENTIFIER               	# var_Identifier_Expr
-     | '(' expr ')'             		# paren_Expr					
+     | BOOLEAN							# boolean				
      ;
 
 //rel_expr locals [ TypeSpec *type = nullptr ]
 //			: '(' expr rel_operation expr ')'  ;
-  
-int_float locals [ TypeSpec *type = nullptr ]
-			: INTEGER					# integerConst
-			| FLOAT						# floatConst
-			;
-   
-number locals [ TypeSpec *type = nullptr ]
-	 		: sign? int_float ;
-	 			
 
-sign		: add_sub_operation ;
-     
 mul_div_operation 		: MUL_OP | DIV_OP ;
 add_sub_operation 		: PLUS_OP | MINUS_OP ;
 relational_operation    : EQ_QUES_OP | NE_OP | LT_OP | LTE_OP | GT_OP | GTE_OP ;
 
-fragment M: [Mm];
+number locals [ TypeSpec *type = nullptr ]
+	 		: sign? int_float ;
+
+sign		: add_sub_operation ;
+
+int_float locals [ TypeSpec *type = nullptr ]
+			: INTEGER					# integerConst
+			| FLOAT						# floatConst
+			;
+
 fragment A: [Aa];
-fragment I: [Ii];
-fragment N: [Nn];
-
-fragment F: [Ff];
-fragment U: [Uu];
-fragment C: [Cc];
-
 fragment B: [Bb];
-fragment T: [Tt];
+fragment C: [Cc];
 fragment D: [Dd];
-
-fragment K: [Kk];
 fragment E: [Ee];
-fragment H: [Hh];
-
-fragment V: [Vv];
-fragment R: [Rr];
-
-fragment L: [Ll];
-fragment P: [Pp];
-fragment O: [oO];
+fragment F: [Ff];
 fragment G: [Gg];
+fragment H: [Hh];
+fragment I: [Ii];
+fragment K: [Kk];
+fragment L: [Ll];
+fragment M: [Mm];
+fragment N: [Nn];
+fragment O: [oO];
+fragment P: [Pp];
+fragment R: [Rr];
+fragment T: [Tt];
+fragment U: [Uu];
+fragment V: [Vv];
 
-MAIN		: V I E C C H I N H ;
-HELPER		: G I U P D O ;
 START 		: B A T D A U ;
 END			: K E T T H U C ;
+MAIN		: V I E C C H I N H ;
+HELPER		: G I U P D O ;
 //VAR     : V A R ;
 LOOP		: L A P ; // similar to repeat...until
 WHEN		: K H I ; // similar to loop...while
@@ -129,15 +133,17 @@ IF			: N E U ;
 PRINT		: I N R A;
 LEFT_BRACE  : '{' ;
 RIGHT_BRACE : '}' ;
-INTEGER 	: [0-9]+ ;
-FLOAT		: [0-9]+ '.' [0-9]+ ;
 REFERENCE	: C O N T R O ;
-PROGRAM_IDENTIFIER : [a-zA-Z][a-zA-Z0-9]* ;
+HUDUNG		: H U D U N G ;
+PROGRAM_IDENTIFIER 		: [a-zA-Z][a-zA-Z0-9]* ;
 FUNC_NAME_IDENTIFIER	: 'G_' [a-zA-Z][a-zA-Z0-9]* ;
 TYPE_IDENTIFIER			: 'T_' [a-zA-Z][a-zA-Z0-9]* ;
 VAR_IDENTIFIER			: 'H_' [a-zA-Z][a-zA-Z0-9]* ;
 
 BOOLEAN			: [TF] ; 
+
+INTEGER 	: [0-9]+ ;
+FLOAT		: [0-9]+ '.' [0-9]+ ;
 
 MUL_OP		:   '*' ;
 DIV_OP		:   '/' ;
@@ -158,6 +164,6 @@ WS      : [ \t]+ -> skip ;
 QUOTE	: '\'' ;
 STRING	: QUOTE STRING_CHAR* QUOTE ;
 
-fragment STRING_CHAR 	: QUOTE QUOTE // double quotes
-						| ~('\'')
+fragment STRING_CHAR 	: QUOTE QUOTE 	// double quotes
+						| ~('\'')		// any non-quote char
 						;

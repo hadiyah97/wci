@@ -1,22 +1,19 @@
-batdau SampleProgram:
+batdau trial:
 
-giupdo G_functionName (T_integer H_firstVariable, T_boolean H_secondVariable)
-{
-	T_float H_apple;
-	H_apple <- 34.5;
-	INRA('This is a print statement. %f', H_apple);
-}
- 
+HUDUNG:
+T_integer H_mango, H_banana;
+T_float H_oranges, H_peels;
+T_boolean H_lies, H_truth.
+
 viecchinh
 {
-	T_integer H_mango; 
-	T_float H_oranges;
-	H_mango <- 45;
-	H_oranges <- -7890;
 	
-	KHI (H_oranges >= 44)
+	H_mango <- -24;
+	H_oranges <- 45.0;
+	
+	KHI (H_oranges >= 44.0)
 	{
-		H_oranges <- (H_mango - 1);
+		H_oranges <- (H_oranges - 1.0);
 	};
 	
 	LAP (H_mango =? -90)
@@ -27,8 +24,7 @@ viecchinh
 	 	};
 	};
 	
-	T_boolean H_lies;
+	INRA ('H_mango bang %d', H_mango);
 	
-	G_functionName(H_mango, H_lies);
 }
 ketthuc
