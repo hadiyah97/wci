@@ -36,7 +36,7 @@ private:
 	vector<string> var_func_list;
 	TypeSpec * type;
 	string type_indicator;
-	ofstream jasmin_file;
+//	ofstream jf;
 	string program_name;
 	string n;
 	int label_number;
@@ -44,54 +44,64 @@ private:
 
 public:
 
-   FirstVisitor();
-   virtual ~FirstVisitor();
+	// constructor
+	FirstVisitor();
 
-   ostream& get_jasmin_file();
+	// destructor
+	virtual ~FirstVisitor() {}
 
-   antlrcpp::Any visitProgram(VietProgParser::ProgramContext *ctx) override;
+	// getter
+//	ostream& get_jasmin_file();
 
-   //   antlrcpp::Any visitFunc_list(VietProgParser::Func_listContext *ctx) override;
-   antlrcpp::Any visitFunc(VietProgParser::FuncContext *ctx) override;
-//   antlrcpp::Any visitFunc_name(VietProgParser::Func_nameContext *ctx) override;
-//   antlrcpp::Any visitParam_list(VietProgParser::Param_listContext *ctx) override;
-   antlrcpp::Any visitParam(VietProgParser::ParamContext *ctx) override;
+	// visitors
+	antlrcpp::Any visitProgram(VietProgParser::ProgramContext *ctx) override;
 
-//   antlrcpp::Any visitMain(VietProgParser::MainContext *ctx) override;
-   antlrcpp::Any visitDeclarations(VietProgParser::DeclarationsContext *ctx) override;
-   antlrcpp::Any visitVar_list(VietProgParser::Var_listContext *ctx) override;
-   antlrcpp::Any visitVar_id(VietProgParser::Var_idContext *ctx) override;
-   antlrcpp::Any visitType_id(VietProgParser::Type_idContext *ctx) override;
+	//   antlrcpp::Any visitFunction_list(VietProgParser::Function_listContext *ctx) override;
+	antlrcpp::Any visitFunction(VietProgParser::FunctionContext *ctx) override;
+	//   antlrcpp::Any visitFunction_name(VietProgParser::Function_nameContext *ctx) override;
+	//   antlrcpp::Any visitParameter_list(VietProgParser::Parameter_listContext *ctx) override;
+	antlrcpp::Any visitParameter(VietProgParser::ParameterContext *ctx) override;
 
-//   antlrcpp::Any visitCompound_stmt(VietProgParser::Compound_stmtContext *ctx) override;
-//   antlrcpp::Any visitStmt(VietProgParser::StmtContext *ctx) override;
-//   antlrcpp::Any visitStmt_list(VietProgParser::Stmt_listContext *ctx) override;
-   antlrcpp::Any visitFuncCall_stmt(VietProgParser::FuncCall_stmtContext *ctx) override;
+	//   antlrcpp::Any visitMain(VietProgParser::MainContext *ctx) override;
+	antlrcpp::Any visitDeclarations(VietProgParser::DeclarationsContext *ctx) override;
+	antlrcpp::Any visitVar_list(VietProgParser::Var_listContext *ctx) override;
+	antlrcpp::Any visitVar_id(VietProgParser::Var_idContext *ctx) override;
+	antlrcpp::Any visitType_id(VietProgParser::Type_idContext *ctx) override;
 
-   antlrcpp::Any visitAssignment_stmt(VietProgParser::Assignment_stmtContext *ctx) override;
-   antlrcpp::Any visitLoop_stmt(VietProgParser::Loop_stmtContext *ctx) override;
-   antlrcpp::Any visitWhen_stmt(VietProgParser::When_stmtContext *ctx) override;
-   antlrcpp::Any visitIf_stmt(VietProgParser::If_stmtContext *ctx) override;
+	//   antlrcpp::Any visitCompound_statement(VietProgParser::Compound_statementContext *ctx) override;
+	//   antlrcpp::Any visitStatement(VietProgParser::StatementContext *ctx) override;
+	//   antlrcpp::Any visitStatement_list(VietProgParser::Statement_listContext *ctx) override;
+	antlrcpp::Any visitFunction_call_statement(VietProgParser::Function_call_statementContext *ctx) override;
 
-   antlrcpp::Any visitPrint_stmt(VietProgParser::Print_stmtContext *ctx) override;
-   antlrcpp::Any visitFormat_string(VietProgParser::Format_stringContext *ctx) override;
-   antlrcpp::Any visitPrint_arg(VietProgParser::Print_argContext *ctx) override;
+	antlrcpp::Any visitAssignment_statement(VietProgParser::Assignment_statementContext *ctx) override;
+	antlrcpp::Any visitLoop_statement(VietProgParser::Loop_statementContext *ctx) override;
+	antlrcpp::Any visitWhen_statement(VietProgParser::When_statementContext *ctx) override;
+	antlrcpp::Any visitIf_statement(VietProgParser::If_statementContext *ctx) override;
 
-   antlrcpp::Any visitBoolean(VietProgParser::BooleanContext *ctx) override;
-   antlrcpp::Any visitAddSubExpr(VietProgParser::AddSubExprContext *ctx) override;
-   antlrcpp::Any visitString(VietProgParser::StringContext *ctx) override;
-   antlrcpp::Any visitNumberConstExpr(VietProgParser::NumberConstExprContext *ctx) override;
-   antlrcpp::Any visitVarIdentifierExpr(VietProgParser::VarIdentifierExprContext *ctx) override;
-   antlrcpp::Any visitRelExpr(VietProgParser::RelExprContext *ctx) override;
-   antlrcpp::Any visitMulDivExpr(VietProgParser::MulDivExprContext *ctx) override;
-   antlrcpp::Any visitParenExpr(VietProgParser::ParenExprContext *ctx) override;
-   antlrcpp::Any visitNumber(VietProgParser::NumberContext *ctx) override;
-   antlrcpp::Any visitIntegerConst(VietProgParser::IntegerConstContext *ctx) override;
-   antlrcpp::Any visitFloatConst(VietProgParser::FloatConstContext *ctx) override;
-//   antlrcpp::Any visitSign(VietProgParser::SignContext *ctx) override;
-//   antlrcpp::Any visitMul_div_operation(VietProgParser::Mul_div_operationContext *ctx) override;
-//   antlrcpp::Any visitAdd_sub_operation(VietProgParser::Add_sub_operationContext *ctx) override;
-//   antlrcpp::Any visitRel_operation(VietProgParser::Rel_operationContext *ctx) override;
+	antlrcpp::Any visitPrint_statement(VietProgParser::Print_statementContext *ctx) override;
+	antlrcpp::Any visitFormat_string(VietProgParser::Format_stringContext *ctx) override;
+	antlrcpp::Any visitPrint_arg(VietProgParser::Print_argContext *ctx) override;
+
+	antlrcpp::Any visitBoolean(VietProgParser::BooleanContext *ctx) override;
+	antlrcpp::Any visitAdd_Sub_Expr(VietProgParser::Add_Sub_ExprContext *ctx) override;
+	antlrcpp::Any visitString(VietProgParser::StringContext *ctx) override;
+	antlrcpp::Any visitNumber_Const_Expr(VietProgParser::Number_Const_ExprContext *ctx) override;
+	antlrcpp::Any visitVar_Identifier_Expr(VietProgParser::Var_Identifier_ExprContext *ctx) override;
+	antlrcpp::Any visitRelational_Expr(VietProgParser::Relational_ExprContext *ctx) override;
+	antlrcpp::Any visitMul_Div_Expr(VietProgParser::Mul_Div_ExprContext *ctx) override;
+	antlrcpp::Any visitParen_Expr(VietProgParser::Paren_ExprContext *ctx) override;
+	antlrcpp::Any visitNumber(VietProgParser::NumberContext *ctx) override;
+
+//	antlrcpp::Any visitSigned_number_Expr(VietProgParser::Signed_number_ExprContext *ctx) override;
+//	antlrcpp::Any visitUnsigned_number_Expr(VietProgParser::Unsigned_number_ExprContext *ctx) override;
+
+
+	antlrcpp::Any visitIntegerConst(VietProgParser::IntegerConstContext *ctx) override;
+	antlrcpp::Any visitFloatConst(VietProgParser::FloatConstContext *ctx) override;
+	//   antlrcpp::Any visitSign(VietProgParser::SignContext *ctx) override;
+	//   antlrcpp::Any visitMul_div_operation(VietProgParser::Mul_div_operationContext *ctx) override;
+	//   antlrcpp::Any visitAdd_sub_operation(VietProgParser::Add_sub_operationContext *ctx) override;
+	//   antlrcpp::Any visitRel_operation(VietProgParser::Rel_operationContext *ctx) override;
 
 };
 

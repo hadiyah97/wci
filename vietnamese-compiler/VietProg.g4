@@ -19,74 +19,79 @@ using namespace wci::intermediate;
 // replace == with =?
 
 
-program		: START PROGRAM_IDENTIFIER ':' (|func_list) main END;
-func_list	: func (func)* ;
+program		: START PROGRAM_IDENTIFIER ':' (|function_list) main END;
+function_list	: function (function)* ;
 
-func		: HELPER func_name '(' param_list ')' compound_stmt;
-func_name	: FUNC_NAME_IDENTIFIER ;
-param_list	: param (',' param)*;
+function	locals [ TypeSpec *type = nullptr ]
+			: HELPER function_name '(' parameter_list ')' compound_statement;
+function_name	: FUNC_NAME_IDENTIFIER ;
+parameter_list	: parameter (',' parameter)*;
 //param		: (|'Ref') variable 'As' type_id;
-param		: type_id var_id
+parameter	locals [ TypeSpec *type = nullptr ]
+			: type_id var_id
 			| type_id var_id REFERENCE
 			;
 			
-main		: MAIN compound_stmt ;
+main		: MAIN compound_statement ;
 
 declarations: type_id var_list;
 var_list	: var_id ( ',' var_id )* ;
-var_id locals [ TypeSpec *type = nullptr ] : VAR_IDENTIFIER ;
-type_id		: TYPE_IDENTIFIER ;
+var_id locals [ TypeSpec *type = nullptr ] 	: VAR_IDENTIFIER ;
+type_id	locals [ TypeSpec *type = nullptr ]	: TYPE_IDENTIFIER ;
 
-compound_stmt: LEFT_BRACE stmt_list RIGHT_BRACE ;
+compound_statement	: LEFT_BRACE statement_list RIGHT_BRACE ;
 
 // (|';')
-stmt		: compound_stmt
-			| assignment_stmt
-			| loop_stmt
-			| when_stmt
-			| if_stmt
-			| funcCall_stmt
+statement	: compound_statement
+			| assignment_statement
+			| loop_statement
+			| when_statement
+			| if_statement
+			| function_call_statement
 			| declarations
-			| print_stmt
+			| print_statement
 			|                	
 			;
-stmt_list 		: stmt ( ';' stmt )* ;
-funcCall_stmt   : func_name '(' var_list ')';     
-assignment_stmt : var_id EQ_operator expr ;
-loop_stmt  		: LOOP '(' expr rel_operation expr ')' stmt ;
-when_stmt       : WHEN '(' expr rel_operation expr ')' stmt ;
-if_stmt         : IF expr stmt;
-print_stmt		: PRINT '(' format_string print_arg* ')' ;
-format_string	: STRING ;
-print_arg		: ',' expr ;
+statement_list 				: statement ( ';' statement )* ;
+function_call_statement   	: function_name '(' var_list ')';     
+assignment_statement 		: var_id EQ_OP expr ;
+loop_statement  			: LOOP '(' expr relational_operation expr ')' statement ;
+when_statement       		: WHEN '(' expr relational_operation expr ')' statement ;
+if_statement         		: IF expr statement;
+print_statement				: PRINT '(' format_string print_arg* ')' ;
+format_string				: STRING ;
+print_arg					: ',' expr ;
 
 //variable : IDENTIFIER ;
 
 expr locals [ TypeSpec *type = nullptr ]
-	 : expr mul_div_operation expr		# mulDivExpr
-     | expr add_sub_operation expr		# addSubExpr
-     | expr rel_operation expr			# relExpr
-     | number                   		# numberConstExpr
+	 : expr mul_div_operation expr		# mul_Div_Expr
+     | expr add_sub_operation expr		# add_Sub_Expr
+     | expr relational_operation expr	# relational_Expr
+     | number                   		# number_Const_Expr
      | STRING							# string
      | BOOLEAN							# boolean
-     | VAR_IDENTIFIER               	# varIdentifierExpr
-     | '(' expr ')'             		# parenExpr					
+     | VAR_IDENTIFIER               	# var_Identifier_Expr
+     | '(' expr ')'             		# paren_Expr					
      ;
 
 //rel_expr locals [ TypeSpec *type = nullptr ]
 //			: '(' expr rel_operation expr ')'  ;
-     
-number locals [ TypeSpec *type = nullptr ]
-	 		: sign? int_float ;	
+  
 int_float locals [ TypeSpec *type = nullptr ]
 			: INTEGER					# integerConst
 			| FLOAT						# floatConst
 			;
+   
+number locals [ TypeSpec *type = nullptr ]
+	 		: sign? int_float ;
+	 			
+
 sign		: add_sub_operation ;
      
-mul_div_operation : MUL_operator | DIV_operator ;
-add_sub_operation : ADD_operator | SUB_operator ;
-rel_operation     : EQ_QUES_operator | NE_operator | LT_operator | LE_operator | GT_operator | GE_operator ;
+mul_div_operation 		: MUL_OP | DIV_OP ;
+add_sub_operation 		: PLUS_OP | MINUS_OP ;
+relational_operation    : EQ_QUES_OP | NE_OP | LT_OP | LTE_OP | GT_OP | GTE_OP ;
 
 fragment M: [Mm];
 fragment A: [Aa];
@@ -134,18 +139,18 @@ VAR_IDENTIFIER			: 'H_' [a-zA-Z][a-zA-Z0-9]* ;
 
 BOOLEAN			: [TF] ; 
 
-MUL_operator	:   '*' ;
-DIV_operator	:   '/' ;
-ADD_operator	:   '+' ;
-SUB_operator	:   '-' ;
+MUL_OP		:   '*' ;
+DIV_OP		:   '/' ;
+PLUS_OP		:   '+' ;
+MINUS_OP	:   '-' ;
 
-EQ_operator 		: '<-' ;
-EQ_QUES_operator	: '=?';
-NE_operator			: '!=' ;
-LT_operator			: '<' ;
-LE_operator			: '<=' ;
-GT_operator			: '>' ;
-GE_operator			: '>=' ;
+EQ_OP 		: '<-' ;
+EQ_QUES_OP	: '=?';
+NE_OP		: '!=' ;
+LT_OP		: '<' ;
+LTE_OP		: '<=' ;
+GT_OP		: '>' ;
+GTE_OP		: '>=' ;
 
 NEWLINE : '\r'? '\n' -> skip  ;
 WS      : [ \t]+ -> skip ; 
