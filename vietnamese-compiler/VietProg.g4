@@ -25,17 +25,19 @@ main		: declarations MAIN compound_statement ;
 
 function_list	: function (function)* ;
 
-function	locals [ TypeSpec *type = nullptr ]
-			: HELPER function_name '(' parameter_list ')' compound_statement;
+function	: HELPER function_name '(' (|parameter_list) ')' (|type_id) function_block (| function_return_statement);
 function_name	: FUNC_NAME_IDENTIFIER ;
+function_block	: (| declaration_list)	compound_statement ;
+function_return_statement : RETURN expr;
 parameter_list	: parameter (',' parameter)*;
+
 //param		: (|'Ref') variable 'As' type_id;
 parameter	locals [ TypeSpec *type = nullptr ]
-			: type_id var_id
-			| type_id var_id REFERENCE
+			: declaration
+			| declaration REFERENCE
 			;
 
-declarations		: HUDUNG ':' declaration_list '.';
+declarations		: CONTAINERS ':' declaration_list '.';
 declaration_list	: declaration ( ';' declaration)* ;
 declaration			: type_id var_list;
 var_list			: var_id ( ',' var_id )* ;
@@ -53,14 +55,16 @@ statement	: compound_statement
 			| function_call_statement
 			| declarations
 			| print_statement
+			| COMMENT
 			|                	
 			;
 			
 statement_list 				: statement ( ';' statement )* ;
 assignment_statement 		: variable EQ_OP expr ;
-loop_statement  			: LOOP '(' expr relational_operation expr ')' statement ;
-when_statement       		: WHEN '(' expr relational_operation expr ')' statement ;
-if_statement         		: IF expr statement;
+loop_statement  			: LOOP '(' expr ')' statement ;
+when_statement       		: WHEN '(' expr ')' statement ;
+if_statement         		: IF expr statement
+							| IF expr statement ELSE statement;
 function_call_statement   	: function_name '(' variable_list ')';
 print_statement				: PRINT '(' format_string print_arg* ')' ;
 
@@ -81,8 +85,8 @@ expr locals [ TypeSpec *type = nullptr ]
      | number                   		# number_Const_Expr
      | variable               			# variable_Expr
      | '(' expr ')'             		# paren_Expr	
-     | STRING							# string
-     | BOOLEAN							# boolean				
+     | BOOLEAN							# boolean
+     | STRING							# string			
      ;
 
 //rel_expr locals [ TypeSpec *type = nullptr ]
@@ -118,6 +122,7 @@ fragment N: [Nn];
 fragment O: [oO];
 fragment P: [Pp];
 fragment R: [Rr];
+fragment S: [Ss];
 fragment T: [Tt];
 fragment U: [Uu];
 fragment V: [Vv];
@@ -130,17 +135,25 @@ HELPER		: G I U P D O ;
 LOOP		: L A P ; // similar to repeat...until
 WHEN		: K H I ; // similar to loop...while
 IF			: N E U ;
+ELSE		: K H A C;
 PRINT		: I N R A;
 LEFT_BRACE  : '{' ;
 RIGHT_BRACE : '}' ;
 REFERENCE	: C O N T R O ;
-HUDUNG		: H U D U N G ;
+CONTAINERS		: H U D U N G ;
 PROGRAM_IDENTIFIER 		: [a-zA-Z][a-zA-Z0-9]* ;
 FUNC_NAME_IDENTIFIER	: 'G_' [a-zA-Z][a-zA-Z0-9]* ;
 TYPE_IDENTIFIER			: 'T_' [a-zA-Z][a-zA-Z0-9]* ;
 VAR_IDENTIFIER			: 'H_' [a-zA-Z][a-zA-Z0-9]* ;
 
-BOOLEAN			: [TF] ; 
+BOOLEAN			: T
+				| F
+				; 
+				
+RETURN 			: T R A L O I ;
+
+COMMENT			: '//' [a-zA-Z_]*[ ]*;
+
 
 INTEGER 	: [0-9]+ ;
 FLOAT		: [0-9]+ '.' [0-9]+ ;

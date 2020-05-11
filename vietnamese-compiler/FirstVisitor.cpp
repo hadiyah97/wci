@@ -225,18 +225,6 @@ antlrcpp::Any FirstVisitor::visitVariable_Expr(VietProgParser::Variable_ExprCont
 	return visitChildren(ctx);
 }
 
-//antlrcpp::Any FirstVisitor::visitVariable(VietProgParser::VariableContext *ctx)
-//{
-//	if(DEBUG_FLAG_1) cout << "First Visitor: visitVariable(): " + ctx->getText() << endl;
-//
-//	string var_name = ctx->VAR_IDENTIFIER()->toString();
-//	SymTabEntry* vid = st_stack->lookup(var_name);
-//
-//	ctx->type = vid->get_typespec();
-//
-//	return visitChildren(ctx);
-//}
-
 antlrcpp::Any FirstVisitor::visitNumber_Const_Expr(VietProgParser::Number_Const_ExprContext *ctx)
 {
 	if(DEBUG_FLAG_1) cout << "First Visitor: visitNumber_Const_Expr(): " + ctx->getText() << endl;
@@ -283,6 +271,17 @@ antlrcpp::Any FirstVisitor::visitParen_Expr(VietProgParser::Paren_ExprContext *c
 	return value;
 }
 
+antlrcpp::Any FirstVisitor::visitBoolean(VietProgParser::BooleanContext *ctx)
+{
+	if(DEBUG_FLAG_1) cout << "First Visitor: visitBoolean(): " + ctx->getText() << endl;
+
+	ctx->type = Predefined::boolean_type;
+	return visitChildren(ctx);
+
+}
+
+//antlrcpp::Any FirstVisitor::visitAssignment_statement(VietProgParser::Assignment_statementContext *ctx)
+//
 //antlrcpp::Any FirstVisitor::visitFunction(VietProgParser::FunctionContext *ctx)
 //{
 //	// TODO: make relevant changes here when the functions can start to return values.

@@ -5,9 +5,33 @@
  *      Author: hadiyah
  */
 
+/*batdau secondProgram:
+
+HUDUNG:
+T_integer H_mango, H_banana;
+T_float H_orange, H_peels;
+T_boolean H_lies, H_truth.
+
+viecchinh
+{
+	H_mango <- 24;
+	INRA ('H_mango bang %d, H_banana bang %d, H_orange bang %f, H_peels bang %f', H_mango, H_banana, H_orange, H_peels);
+}
+ketthuc
+
+giupdo G_functionName (T_integer H_firstVariable, T_boolean H_secondVariable)
+{
+	T_float H_apple;
+	H_apple <- 34.5;
+	INRA('This is a print statement. %f', H_apple);
+
+
+	G_functionName(H_mango, H_lies);
+}
+*/
 
 /*
- * LabeledExprMain.cpp
+ * VietProgMain.cpp
  *
  *  Created on: Apr 26, 2020
  *      Author: hadiyah
@@ -24,20 +48,6 @@
 using namespace antlrcpp;
 using namespace antlr4;
 using namespace std;
-
-
-/*
-giupdo G_functionName (T_integer H_firstVariable, T_boolean H_secondVariable)
-{
-	T_float H_apple;
-	H_apple <- 34.5;
-	INRA('This is a print statement. %f', H_apple);
-
-
-	G_functionName(H_mango, H_lies);
-}
-*/
-
 
 
 int main(int argc, const char *args[])

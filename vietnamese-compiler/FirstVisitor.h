@@ -74,6 +74,7 @@ public:
 	antlrcpp::Any visitFloatConst(VietProgParser::FloatConstContext *ctx) override;
 	antlrcpp::Any visitParen_Expr(VietProgParser::Paren_ExprContext *ctx) override;
 
+	antlrcpp::Any visitBoolean(VietProgParser::BooleanContext *ctx) override;
 	//	antlrcpp::Any visitFunction(VietProgParser::FunctionContext *ctx) override;
 
 	//	antlrcpp::Any visitMain(VietProgParser::MainContext *ctx) override;
@@ -84,7 +85,7 @@ public:
 	//
 	//	antlrcpp::Any visitFunction_call_statement(VietProgParser::Function_call_statementContext *ctx)override;
 	//
-	//	antlrcpp::Any visitAssignment_statement(VietProgParser::Assignment_statementContext *ctx)override;
+	//	antlrcpp::Any visitAssignment_statement(VietProgParser::Assignment_statementContext *ctx) override;
 	//	antlrcpp::Any visitLoop_statement(VietProgParser::Loop_statementContext *ctx)override;
 	//	antlrcpp::Any visitWhen_statement(VietProgParser::When_statementContext *ctx) override;
 	//	antlrcpp::Any visitIf_statement(VietProgParser::If_statementContext *ctx) override;

@@ -1,5 +1,10 @@
 batdau trial:
 
+giupdo G_functionName (T_integer H_firstVariable, T_boolean H_secondVariable)
+{
+	H_firstVariable <- -45;
+}
+
 HUDUNG:
 T_integer H_mango, H_banana;
 T_float H_oranges, H_peels;
@@ -21,9 +26,14 @@ viecchinh
 		NEU (5 =? 6)
 	 	{
 	 		H_mango <- -90;
+	 	}
+	 	KHAC
+	 	{
+	 		H_mango <- -90;
 	 	};
 	};
 	
+	H_lies <- 'T';
 	INRA ('H_mango bang %d', H_mango);
 	
 }
