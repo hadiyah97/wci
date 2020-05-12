@@ -285,13 +285,13 @@ L004:
 	ldc	2.0
 	putstatic	secondprogram/H_peels F
 
-; KHI(H_peels>=3.0){INRA('\nH_truth bang (1):\t%d',H_truth);INRA('\nH_peels bang (2, 1, 0):\t%f',H_peels);H_peels<-H_peels-1.0;}
+; KHI(H_peels>=0.0){INRA('\nH_truth bang (1):\t%d',H_truth);INRA('\nH_peels bang (2, 1, 0):\t%f',H_peels);H_peels<-H_peels-1.0;}
 
 
 L005:
 
 	getstatic	secondprogram/H_peels F
-	ldc	3.0
+	ldc	0.0
 	fcmpl
 	ifge	L006
 	iconst_0

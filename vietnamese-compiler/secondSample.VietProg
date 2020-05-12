@@ -44,7 +44,7 @@ viecchinh
 	INRA ('H_mango bang (-12):\t%d,\nH_banana bang (0):\t%d,\nH_orange bang (45.0):\t%f,\nH_peels bang (4050.0):\t%f,\nH_lies bang (0):\t%d,\nH_truth bang (1):\t%d.',H_mango, H_banana, H_orange, H_peels, H_lies, H_truth);
 	
 	H_peels <- 2.0;
-	KHI (H_peels >= 3.0)
+	KHI (H_peels >= 0.0)
 	{
 		INRA ('\nH_truth bang (1):\t%d', H_truth);
 		INRA ('\nH_peels bang (2, 1, 0):\t%f', H_peels);

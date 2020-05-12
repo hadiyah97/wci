@@ -44,6 +44,7 @@ giupdo G_functionName (T_integer H_firstVariable, T_boolean H_secondVariable)
 #include "VietProgParser.h"
 #include "FirstVisitor.h"
 #include "SecondVisitor.h"
+#include "LocalVariable.h"
 
 using namespace antlrcpp;
 using namespace antlr4;
@@ -52,6 +53,9 @@ using namespace std;
 
 int main(int argc, const char *args[])
 {
+	LocalVariable lv;
+
+
 	ifstream ins;
 
 	// Create the input stream.

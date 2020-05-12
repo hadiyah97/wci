@@ -1,40 +1,28 @@
 batdau trial:
 
-giupdo G_functionName (T_integer H_firstVariable, T_boolean H_secondVariable)
+
+giupdo G_functionName (T_integer H_firstVariable) T_integer
 {
-	H_firstVariable <- -45;
+	INRA ('Inside the function:');
+	INRA ('H_firstVariable bang (1):\t%d', H_firstVariable);
+	TRALOI H_firstVariable;
 }
 
+	
 HUDUNG:
-T_integer H_mango, H_banana;
-T_float H_oranges, H_peels;
-T_boolean H_lies, H_truth.
+T_integer H_mango;
+T_float H_oranges.
 
 viecchinh
 {
+	H_mango <- -25;
+	INRA ('H_mango bang (-25):\t%d', H_mango);
 	
-	H_mango <- -24;
-	H_oranges <- 45.0;
+	H_oranges <- 95.4;
+	INRA ('H_oranges bang (95.4):\t%f', H_oranges);
 	
-	KHI (H_oranges >= 44.0)
-	{
-		H_oranges <- (H_oranges - 1.0);
-	};
-	
-	LAP (H_mango =? -90)
-	{
-		NEU (5 =? 6)
-	 	{
-	 		H_mango <- -90;
-	 	}
-	 	KHAC
-	 	{
-	 		H_mango <- -90;
-	 	};
-	};
-	
-	H_lies <- 'T';
-	INRA ('H_mango bang %d', H_mango);
+	H_mango <- G_functionName(1);
+	INRA ('H_mango bang (0):\t%d', H_mango);
 	
 }
 ketthuc

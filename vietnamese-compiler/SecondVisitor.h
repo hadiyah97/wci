@@ -21,6 +21,8 @@ using namespace wci::intermediate;
 #include "antlr4-runtime.h"
 #include "VietProgVisitor.h"
 #include "VietProgBaseVisitor.h"
+#include <unordered_map>
+#include <boost/any.hpp>
 
 
 /**
@@ -36,6 +38,9 @@ private:
 	string program_name;
 	string jf_name;
 	int label_number;
+	bool function_flag;
+	bool function_call_flag;
+	vector<VietProgParser::Var_idContext *> local_func_variables;
 
 public:
 
@@ -45,8 +50,15 @@ public:
 	// destructor
 	virtual ~SecondVisitor();
 
-	// getter
+	// helpers
 	ofstream& get_jasmin_file();
+	void print_local_func_variables();
+	void emit_program_header();
+	void emit_pascalRTL_vars();
+	void emit_class_constructor();
+	void emit_main_prologue();
+	void emit_main_epilogue();
+	void emit_function_epilogue();
 
 	// visitors
 	antlrcpp::Any visitProgram(VietProgParser::ProgramContext *ctx) override;
@@ -65,6 +77,16 @@ public:
 	antlrcpp::Any visitFloatConst(VietProgParser::FloatConstContext *ctx) override;
 	antlrcpp::Any visitRelational_Expr(VietProgParser::Relational_ExprContext *ctx) override;
 	antlrcpp::Any visitBoolean(VietProgParser::BooleanContext *ctx) override;
+	antlrcpp::Any visitLoop_statement(VietProgParser::Loop_statementContext *ctx)override;
+	antlrcpp::Any visitWhen_statement(VietProgParser::When_statementContext *ctx) override;
+	antlrcpp::Any visitIf_statement(VietProgParser::If_statementContext *ctx) override;
+
+	antlrcpp::Any visitFunction(VietProgParser::FunctionContext *ctx) override;
+//	antlrcpp::Any visitParameter_list(VietProgParser::Parameter_listContext *ctx) override;
+	antlrcpp::Any visitType_id(VietProgParser::Type_idContext *ctx) override;
+	antlrcpp::Any visitFunction_return_statement(VietProgParser::Function_return_statementContext *ctx) override;
+	antlrcpp::Any visitFunction_call_statement(VietProgParser::Function_call_statementContext *ctx) override;
+
 	//	antlrcpp::Any visitParen_Expr(VietProgParser::Paren_ExprContext *ctx) override;
 
 	//	antlrcpp::Any visitVariable(VietProgParser::VariableContext *ctx) override;
@@ -80,14 +102,7 @@ public:
 	//	antlrcpp::Any visitStatement_list(VietProgParser::Statement_listContext *ctx) override;
 	//
 	//	antlrcpp::Any visitFunction_call_statement(VietProgParser::Function_call_statementContext *ctx)override;
-	//
-	//
-		antlrcpp::Any visitLoop_statement(VietProgParser::Loop_statementContext *ctx)override;
-		antlrcpp::Any visitWhen_statement(VietProgParser::When_statementContext *ctx) override;
-		antlrcpp::Any visitIf_statement(VietProgParser::If_statementContext *ctx) override;
-	//
-	//
-	//
+
 	//	antlrcpp::Any visitFormat_string(VietProgParser::Format_stringContext *ctx) override;
 	//	antlrcpp::Any visitPrint_arg(VietProgParser::Print_argContext *ctx) override;
 	//

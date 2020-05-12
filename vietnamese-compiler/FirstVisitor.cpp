@@ -15,6 +15,7 @@
 #include "wci/intermediate/SymTabStack.h"
 #include "wci/intermediate/SymTabEntry.h"
 #include "wci/intermediate/symtabimpl/Predefined.h"
+#include "wci/intermediate/symtabimpl/SymTabEntryImpl.h"
 
 #include "FirstVisitor.h"
 #include "VietProgBaseVisitor.h"
@@ -30,13 +31,18 @@ const bool DEBUG_FLAG_1 = true;
 
 FirstVisitor::FirstVisitor()
 {
-   st_stack = SymTabFactory::create_symtab_stack();
-   Predefined::initialize(st_stack);
-//   type = nullptr;
-//   label_number = 0;
-//   error_count = 0;
+	function_flag = false;
+	current_var_array_index = -1;
+//	current_function_ctx = nullptr;
 
-   if (DEBUG_FLAG_1) cout << "First Visitor: FirstVisitor() - st_stack initialized." << endl;
+	st_stack = SymTabFactory::create_symtab_stack();
+	Predefined::initialize(st_stack);
+
+	//	type = nullptr;
+	//	label_number = 0;
+	//	error_count = 0;
+
+	if (DEBUG_FLAG_1) cout << "First Visitor: FirstVisitor() - st_stack initialized." << endl;
 
 }
 
@@ -73,7 +79,7 @@ antlrcpp::Any FirstVisitor::visitProgram(VietProgParser::ProgramContext *ctx)
 
 antlrcpp::Any FirstVisitor::visitDeclaration(VietProgParser::DeclarationContext *ctx)
 {
-	if(DEBUG_FLAG_1) cout << "First Visitor: visitVar_list(): " + ctx->getText() << endl;
+	if(DEBUG_FLAG_1) cout << "First Visitor: visitDeclaration(): " + ctx->getText() << endl;
 
 	// visit the variable list first to add them to the var_id vector and the symbol table stack.
 	auto value = visit(ctx->var_list());
@@ -107,10 +113,18 @@ antlrcpp::Any FirstVisitor::visitVar_id(VietProgParser::Var_idContext *ctx)
 	var_id_list.push_back(vid);
 	var_ctx_list.push_back(ctx);
 
-//	if (st_stack->get_current_nesting_level() == 2)
-//	{
-//		var_func_list.push_back(var_name);
-//	}
+	// set the position of the variable in the local variables array.
+	if(function_flag)
+	{
+		local_func_variables[var_name] = current_var_array_index++;
+		// update the parse tree.
+		ctx->local_var = new LocalVariable();
+		ctx->local_var->set_local_var_array_index(current_var_array_index);
+//		ctx->local_var->set_parent_function(current_function_ctx);
+		// update the symbol table stack.
+//		vid->set_attribute((SymTabKey) VAR_ARRAY_INDEX, current_var_array_index);
+//		vid->set_attribute((SymTabKey) PARENT_FUNCTION, current_function_ctx);
+	}
 
 	return visitChildren(ctx);
 }
@@ -128,6 +142,15 @@ antlrcpp::Any FirstVisitor::visitType_id(VietProgParser::Type_idContext *ctx)
 
 	ctx->type = type; // set the type
 
+	// if the type_id is the return type node of the function declaration right now,
+	// then we don't need to update the nodes or the symbol table entries.
+	// it will suffice to simply return.
+	//cout << "PRINTING GIUPDO: " << ctx->parent->children[0]->toString();
+	if(ctx->parent->children[0]->toString() == "giupdo")
+	{
+		return visitChildren(ctx);
+	}
+
 	// set the type of the symbol table entries
 	for (SymTabEntry *id: var_id_list)
 	{
@@ -139,6 +162,7 @@ antlrcpp::Any FirstVisitor::visitType_id(VietProgParser::Type_idContext *ctx)
 	{
 		var_ctx->type = type;
 	}
+
 
 	return visitChildren(ctx);
 }
@@ -215,12 +239,29 @@ antlrcpp::Any FirstVisitor::visitRelational_Expr(VietProgParser::Relational_Expr
 
 antlrcpp::Any FirstVisitor::visitVariable_Expr(VietProgParser::Variable_ExprContext *ctx)
 {
-	if(DEBUG_FLAG_1) cout << "First Visitor: visitVar_Identifier_Expr(): " + ctx->getText() << endl;
+	if(DEBUG_FLAG_1) cout << "First Visitor: visitVariable_Expr(): " + ctx->getText() << endl;
 
 	string var_name = ctx->variable()->VAR_IDENTIFIER()->toString();
 	SymTabEntry* vid = st_stack->lookup(var_name);
 
 	ctx->type = vid->get_typespec();
+
+	if(function_flag)
+	{
+		unordered_map<string, int>:: iterator it;
+		if (local_func_variables.find(var_name) == local_func_variables.end())
+		{
+			cout << "Attempting to use undeclared variable: " + var_name << endl;
+		}
+		else
+		{
+			it = local_func_variables.find(var_name);
+			if (DEBUG_FLAG_1) cout << "CURRENT LOCAL VAR: " << var_name << ", INDEX: " << it->second << endl;
+			ctx->local_var = new LocalVariable();
+			ctx->local_var->set_local_var_array_index(it->second);
+
+		}
+	}
 
 	return visitChildren(ctx);
 }
@@ -280,8 +321,65 @@ antlrcpp::Any FirstVisitor::visitBoolean(VietProgParser::BooleanContext *ctx)
 
 }
 
+antlrcpp::Any FirstVisitor::visitFunction(VietProgParser::FunctionContext *ctx)
+{
+	if (DEBUG_FLAG_1) cout << "First Visitor: visitFunction(): " + ctx->getText() << endl;
+	// let every consecutive function being called know that it is currently
+	// operating inside a function.
+	// this should work fine since nested functions are not allowed.
+//	current_function_ctx = ctx;
+	function_flag = true;
+	current_var_array_index = -1;
+
+	string function_name = ctx->function_name()->FUNC_NAME_IDENTIFIER()->toString();
+	string type_name;
+	TypeSpec* type;
+
+	if(ctx->type_id() != NULL)
+	{
+		type_name = ctx->type_id()->TYPE_IDENTIFIER()->toString();
+		type = (type_name == "T_integer") ? Predefined::integer_type
+			 : (type_name == "T_float")   ? Predefined::real_type
+			 : (type_name == "T_boolean") ? Predefined::boolean_type
+			 : nullptr;
+		ctx->function_name()->type = type;
+	}
+
+	SymTabEntry* fid = st_stack->enter_local(function_name);
+	fid->set_definition((Definition) DF_FUNCTION);
+	fid->set_attribute((SymTabKey) ROUTINE_SYMTAB,
+						st_stack->push());
+	if (type != NULL) fid->set_typespec(type);
+
+	auto value = visitChildren(ctx);
+
+	if (DEBUG_FLAG_1)
+	{
+		cout << "Printing the function symbol table: " << endl;
+		CrossReferencer cr;
+		cr.print(st_stack);
+	}
+
+	// clean up.
+//	current_function_ctx = nullptr;
+	function_flag = false;
+	current_var_array_index = 0;
+	st_stack->pop();
+
+	return value;
+}
+
+antlrcpp::Any FirstVisitor::visitVariable(VietProgParser::VariableContext *ctx)
+{
+	if (DEBUG_FLAG_1) cout << "First Visitor: visitVariable(): " + ctx->getText() << endl;
+
+	if (DEBUG_FLAG_1) cout << "CURRENT NESTING LEVEL: " << st_stack->get_current_nesting_level() << endl;
+	return visitChildren(ctx);
+
+}
+
+//antlrcpp::Any FirstVisitor::visitParameter_list(VietProgParser::Parameter_listContext *ctx)
 //antlrcpp::Any FirstVisitor::visitAssignment_statement(VietProgParser::Assignment_statementContext *ctx)
-//
 //antlrcpp::Any FirstVisitor::visitFunction(VietProgParser::FunctionContext *ctx)
 //{
 //	// TODO: make relevant changes here when the functions can start to return values.
@@ -329,7 +427,7 @@ antlrcpp::Any FirstVisitor::visitBoolean(VietProgParser::BooleanContext *ctx)
 //	return visitChildren(ctx);
 //}
 
-//antlrcpp::Any FirstVisitor::visitParameter(VietProgParser::ParameterContext *ctx)
+//	antlrcpp::Any FirstVisitor::visitParameter(VietProgParser::ParameterContext *ctx)
 //{
 //	// parameter : type_id var_id + (optional) reference;
 //	if(DEBUG_FLAG_1) cout << "First Visitor: visitParameter(): " + ctx->getText() << endl;
@@ -354,7 +452,7 @@ antlrcpp::Any FirstVisitor::visitBoolean(VietProgParser::BooleanContext *ctx)
 //}
 
 //	antlrcpp::Any visitDeclaration(VietProgParser::DeclarationsContext *ctx);
-//
+
 //	antlrcpp::Any visitFunc_list(VietProgParser::Func_listContext *ctx);
 //
 //	antlrcpp::Any visitMain(VietProgParser::MainContext *ctx);

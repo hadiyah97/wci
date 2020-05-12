@@ -9,6 +9,7 @@
 #define FIRSTVISITOR_H_
 
 #include <iostream>
+#include <unordered_map>
 
 #include "wci/intermediate/TypeSpec.h"
 #include "wci/intermediate/SymTabStack.h"
@@ -32,18 +33,9 @@ private:
 	SymTabStack *st_stack;
 	vector<SymTabEntry *> var_id_list;
 	vector<VietProgParser::Var_idContext *> var_ctx_list;
-
-//	int error_count;
-
-//	SymTabEntry *pid;
-//	vector<string> var_func_list;
-//	TypeSpec * type;
-//
-//	string type_indicator;
-//	ofstream jf;
-//	string program_name;
-//	string n;
-//	int label_number;
+	bool function_flag;
+	unordered_map<string, int> local_func_variables;
+	int current_var_array_index;
 
 public:
 
@@ -67,7 +59,7 @@ public:
 	antlrcpp::Any visitMul_Div_Expr(VietProgParser::Mul_Div_ExprContext *ctx) override;
 	antlrcpp::Any visitRelational_Expr(VietProgParser::Relational_ExprContext *ctx) override;
 	antlrcpp::Any visitVariable_Expr(VietProgParser::Variable_ExprContext *ctx) override;
-//	antlrcpp::Any visitVariable(VietProgParser::VariableContext *ctx) override;
+	antlrcpp::Any visitVariable(VietProgParser::VariableContext *ctx) override;
 	antlrcpp::Any visitNumber_Const_Expr(VietProgParser::Number_Const_ExprContext *ctx) override;
 	antlrcpp::Any visitNumber(VietProgParser::NumberContext *ctx) override;
 	antlrcpp::Any visitIntegerConst(VietProgParser::IntegerConstContext *ctx) override;
@@ -75,8 +67,8 @@ public:
 	antlrcpp::Any visitParen_Expr(VietProgParser::Paren_ExprContext *ctx) override;
 
 	antlrcpp::Any visitBoolean(VietProgParser::BooleanContext *ctx) override;
-	//	antlrcpp::Any visitFunction(VietProgParser::FunctionContext *ctx) override;
-
+	antlrcpp::Any visitFunction(VietProgParser::FunctionContext *ctx) override;
+	//antlrcpp::Any visitParameter_list(VietProgParser::Parameter_listContext *ctx) override;
 	//	antlrcpp::Any visitMain(VietProgParser::MainContext *ctx) override;
 	//
 	//	antlrcpp::Any visitCompound_statement(VietProgParser::Compound_statementContext *ctx) override;

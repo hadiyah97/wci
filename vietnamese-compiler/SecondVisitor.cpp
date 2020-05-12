@@ -29,17 +29,109 @@ using namespace wci::util;
 const bool DEBUG_FLAG_2 = true;
 
 // constructor
-SecondVisitor::SecondVisitor() : jf(nullptr), program_name(""), label_number(0)
-{
-}
+SecondVisitor::SecondVisitor() : jf(nullptr), program_name(""), jf_name(""), label_number(0), function_flag(false), function_call_flag(false) {}
 
 // destructor
 SecondVisitor::~SecondVisitor() {}
 
-// getter
+// helpers
 ofstream& SecondVisitor::get_jasmin_file()
 {
 	return jf;
+}
+
+void SecondVisitor::emit_program_header()
+{
+	// emit program header information.
+	jf << ".class public " << program_name << endl;
+	jf << ".super java/lang/Object" << endl;
+}
+
+void SecondVisitor::print_local_func_variables()
+{
+	string var_name = "";
+	string type_letter = "";
+	int index = -1;
+	TypeSpec* type;
+//	VietProgParser::Var_idContext * itr;
+	for (unsigned int i = 0; i < local_func_variables.size(); i++)
+	{
+		var_name = local_func_variables[i]->VAR_IDENTIFIER()->toString();
+		type = local_func_variables[i]->type;
+		type_letter 	= (type == Predefined::integer_type)	? "I"
+						: (type == Predefined::real_type)		? "F"
+					 	: (type == Predefined::boolean_type) 	? "I"
+					 	: 										"?";
+		index = local_func_variables[i]->local_var->get_local_var_array_index();
+
+		jf << endl <<".var " << index << " is " << var_name << " " << type_letter;
+	}
+
+	jf << endl << ".var " << ++index << " is "; // function name and return type will go here.
+
+}
+
+void SecondVisitor::emit_pascalRTL_vars()
+{
+	// emit the declarations related to the PascalRTL jar.
+	jf << endl;
+	jf << ".field private static _runTimer LRunTimer;" << endl;
+	jf << ".field private static _standardIn LPascalTextIn;" << endl;
+}
+
+void SecondVisitor::emit_class_constructor()
+{
+	// emit the class constructor.
+	jf << ".method public <init>()V" << endl;
+	jf << endl;
+	jf << "\taload_0" << endl;
+	jf << "\tinvokenonvirtual java/lang/Object/<init>()V" << endl;
+	jf << "\treturn" << endl;
+	jf << endl;
+	jf << ".limit locals 1" << endl;
+	jf << ".limit stack 1" << endl;
+	jf << ".end method" << endl;
+	jf << endl;
+
+}
+
+void SecondVisitor::emit_main_prologue()
+{
+	// emit the main program header and prologue.
+	jf << ".method public static main([Ljava/lang/String;)V" << endl;
+	jf << endl;
+	jf << "\tnew RunTimer" << endl;
+	jf << "\tdup" << endl;
+	jf << "\tinvokenonvirtual RunTimer/<init>()V" << endl;
+	jf << "\tputstatic\t" << program_name
+			<< "/_runTimer LRunTimer;" << endl;
+	jf << "\tnew PascalTextIn" << endl;
+	jf << "\tdup" << endl;
+	jf << "\tinvokenonvirtual PascalTextIn/<init>()V" << endl;
+	jf << "\tputstatic\t" + program_name
+			<< "/_standardIn LPascalTextIn;" << endl;
+}
+
+void SecondVisitor::emit_main_epilogue()
+{
+	// emit the main program epilogue.
+	jf << endl;
+	jf << "\tgetstatic     " << program_name
+            << "/_runTimer LRunTimer;" << endl;
+	jf << "\tinvokevirtual RunTimer.printElapsedTime()V" << endl;
+	jf << endl;
+	jf << "\treturn" << endl;
+	jf << endl;
+	jf << ".limit locals 256" << endl;
+	jf << ".limit stack 256" << endl;
+	jf << ".end method" << endl;
+}
+
+void SecondVisitor::emit_function_epilogue()
+{
+	jf << ".limit locals 32" << endl;
+	jf << ".limit stack 32" << endl;
+	jf << ".end method" << endl << endl;
 }
 
 // visitors
@@ -60,11 +152,17 @@ antlrcpp::Any SecondVisitor::visitProgram(VietProgParser::ProgramContext *ctx)
 
 	if(DEBUG_FLAG_2) cout << "Second Visitor: visitProgram(): created Jasmin file: " + jf_name << endl;
 
-	// emit program header information.
-	jf << ".class public " << program_name << endl;
-	jf << ".super java/lang/Object" << endl;
+	// emit the program heaader
+	emit_program_header();
+	// emit the pascal rtl stuff
+	emit_pascalRTL_vars();
+	// emit the declarations.
+	visit(ctx->main()->declarations());
+	jf << endl;
+	// emit the constructor
+	emit_class_constructor();
 
-	// parse the rest of the program.
+	// parse the rest of the program (functions and main).
     auto value = visitChildren(ctx);
 
     // finished parsing the program. close the assembly file.
@@ -78,57 +176,20 @@ antlrcpp::Any SecondVisitor::visitMain(VietProgParser::MainContext *ctx)
 {
 	if (DEBUG_FLAG_2) cout << "Second Visitor: visitMainBlock(): " << endl;
 
-	// emit the code related to the PascalRTL jar.
-	jf << endl;
-	jf << ".field private static _runTimer LRunTimer;" << endl;
-	jf << ".field private static _standardIn LPascalTextIn;" << endl;
+	// emit the pascal rtl stuff
+	// emit the declarations
+	// emit the class constructor
 
-	// emit the declarations.
-	visit(ctx->declarations());
-	jf << endl;
-
-	// emit the class constructor.
-	jf << ".method public <init>()V" << endl;
-	jf << endl;
-	jf << "\taload_0" << endl;
-	jf << "\tinvokenonvirtual java/lang/Object/<init>()V" << endl;
-	jf << "\treturn" << endl;
-	jf << endl;
-	jf << ".limit locals 1" << endl;
-	jf << ".limit stack 1" << endl;
-	jf << ".end method" << endl;
-	jf << endl;
-
-	// emit the main program header and prologue.
-	jf << ".method public static main([Ljava/lang/String;)V" << endl;
-	jf << endl;
-	jf << "\tnew RunTimer" << endl;
-	jf << "\tdup" << endl;
-	jf << "\tinvokenonvirtual RunTimer/<init>()V" << endl;
-	jf << "\tputstatic\t" << program_name
-			<< "/_runTimer LRunTimer;" << endl;
-	jf << "\tnew PascalTextIn" << endl;
-	jf << "\tdup" << endl;
-	jf << "\tinvokenonvirtual PascalTextIn/<init>()V" << endl;
-	jf << "\tputstatic\t" + program_name
-			<< "/_standardIn LPascalTextIn;" << endl;
+	// emit the prologue.
+	emit_main_prologue();
 
 	// emit code for the main program's compound statement.
-	visit(ctx->compound_statement());
+	auto value = visit(ctx->compound_statement());
 
-	// emit the main program epilogue.
-	jf << endl;
-	jf << "\tgetstatic     " << program_name
-            << "/_runTimer LRunTimer;" << endl;
-	jf << "\tinvokevirtual RunTimer.printElapsedTime()V" << endl;
-	jf << endl;
-	jf << "\treturn" << endl;
-	jf << endl;
-	jf << ".limit locals 256" << endl;
-	jf << ".limit stack 256" << endl;
-	jf << ".end method" << endl;
+	// emit the epilogue.
+	emit_main_epilogue();
 
-	return nullptr;
+	return value;
 
 }
 
@@ -139,35 +200,40 @@ antlrcpp::Any SecondVisitor::visitDeclarations(VietProgParser::DeclarationsConte
 	return visitChildren(ctx);
 }
 
+
 antlrcpp::Any SecondVisitor::visitDeclaration(VietProgParser::DeclarationContext *ctx)
 {
 	if (DEBUG_FLAG_2) cout << "Second Visitor: visitDeclaration(): " + ctx->getText() << endl;
-
-	jf << "\n; " << ctx->getText() << "\n" << endl;
+	if(!function_flag) jf << "\n; " << ctx->getText() << "\n" << endl;
 	return visitChildren(ctx);
 }
+
 
 antlrcpp::Any SecondVisitor::visitVar_id(VietProgParser::Var_idContext *ctx)
 {
 	if (DEBUG_FLAG_2) cout << "Second Visitor: visitVar_id(): " + ctx->getText() << endl;
 
-	string var_name = ctx->VAR_IDENTIFIER()->toString();
-	TypeSpec *type = ctx->type;
-
-	// emit the field declaration.
-	// treat boolean as an integer.
-	string type_indicator 	= (type == Predefined::integer_type)	? "I"
-						 	: (type == Predefined::real_type)		? "F"
-						 	: (type == Predefined::boolean_type) 	? "I"
-						 	: 										"?";
-
-	// TODO: check if this also needs to be updated for function support.
-	jf << ".field private static "
-			<< var_name << " " << type_indicator << endl;
+	if(!function_flag)
+	{
+		string var_name = ctx->VAR_IDENTIFIER()->toString();
+		TypeSpec *type = ctx->type;
+		// emit the field declaration.
+		// treat boolean as an integer.
+		string type_letter 	= (type == Predefined::integer_type)	? "I"
+							 	: (type == Predefined::real_type)		? "F"
+							 	: (type == Predefined::boolean_type) 	? "I"
+							 	: 										"?";
+		jf << ".field private static "
+				<< var_name << " " << type_letter << endl;
+	}
+	else
+	{
+		local_func_variables.push_back(ctx);
+	}
 
 	return visitChildren(ctx);
-
 }
+
 
 antlrcpp::Any SecondVisitor::visitStatement(VietProgParser::StatementContext *ctx)
 {
@@ -178,6 +244,7 @@ antlrcpp::Any SecondVisitor::visitStatement(VietProgParser::StatementContext *ct
 	return visitChildren(ctx);
 }
 
+
 antlrcpp::Any SecondVisitor::visitAssignment_statement(VietProgParser::Assignment_statementContext *ctx)
 {
 	if (DEBUG_FLAG_2) cout << "Second Visitor: visitAssignment_statement(): " + ctx->getText() << endl;
@@ -187,21 +254,49 @@ antlrcpp::Any SecondVisitor::visitAssignment_statement(VietProgParser::Assignmen
 	TypeSpec * type = ctx->expr()->type;
 
 	// treat boolean as an integer
-	string type_indicator	= (type == Predefined::integer_type) 	? "I"
-							: (type == Predefined::real_type) 		? "F"
-							: (type == Predefined::boolean_type) 	? "I"
-							:										"?";
+	string type_letter;
+	if(!function_flag)
+	{
+		type_letter = (type == Predefined::integer_type) ? "I"
+					: (type == Predefined::real_type) 	? "F"
+					: (type == Predefined::boolean_type) ? "I"
+					:									"?";
+		// Program variable:
+		// emit a field put instruction.
+		jf << "\tputstatic\t" << program_name
+				<< "/" << ctx->variable()->VAR_IDENTIFIER()->toString()
+				<< " " << type_letter << endl;
+	}
+	else
+	{
+		type_letter = (type == Predefined::integer_type) ? "i"
+					: (type == Predefined::real_type) 	? "f"
+					: (type == Predefined::boolean_type) ? "i"
+					:									"?";
 
-	// TODO: check if the variable is a function variable or a program variable.
-	// Program variable:
-	// emit a field put instruction.
-	jf << "\tputstatic\t" << program_name
-			<< "/" << ctx->variable()->VAR_IDENTIFIER()->toString()
-			<< " " << type_indicator << endl;
-	// TODO: Function variable:
+		// retrieve the local variables array index of the variable.
+		string var_name = ctx->variable()->VAR_IDENTIFIER()->toString();
+		int index = -1;
+		//VietProgParser::Var_idContext * itr;
+		for (unsigned int i = 0; i < local_func_variables.size(); i++)
+		{
+			if (var_name == local_func_variables[i]->VAR_IDENTIFIER()->toString())
+			{
+				index = local_func_variables[i]->local_var->get_local_var_array_index();
+			}
+		}
+		if (index == -1)
+		{
+			cout << "Assignment to undeclared variable: " + var_name << endl;
+			cout << "Using the first local variable of the function instead." << endl;
+			index = 0;
+		}
+		jf << "\t" << type_letter << "store_" << index << endl;
+	}
 
 	return value;
 }
+
 
 antlrcpp::Any SecondVisitor::visitPrint_statement(VietProgParser::Print_statementContext *ctx)
 {
@@ -269,6 +364,7 @@ antlrcpp::Any SecondVisitor::visitPrint_statement(VietProgParser::Print_statemen
     return nullptr;
 }
 
+
 antlrcpp::Any SecondVisitor::visitAdd_Sub_Expr(VietProgParser::Add_Sub_ExprContext *ctx)
 {
 	if (DEBUG_FLAG_2) cout << "Second Visitor: visitAdd_Sub_Expr(): " + ctx->getText() << endl;
@@ -303,6 +399,7 @@ antlrcpp::Any SecondVisitor::visitAdd_Sub_Expr(VietProgParser::Add_Sub_ExprConte
 
 	return value;
 }
+
 
 antlrcpp::Any SecondVisitor::visitMul_Div_Expr(VietProgParser::Mul_Div_ExprContext *ctx)
 {
@@ -339,26 +436,54 @@ antlrcpp::Any SecondVisitor::visitMul_Div_Expr(VietProgParser::Mul_Div_ExprConte
 	return value;
 }
 
+
 antlrcpp::Any SecondVisitor::visitVariable_Expr(VietProgParser::Variable_ExprContext *ctx)
 {
 	if (DEBUG_FLAG_2) cout << "Second Visitor: visitVariable_Expr(): " + ctx->getText() << endl;
 
 	string var_name = ctx->variable()->VAR_IDENTIFIER()->toString();
 	TypeSpec * type = ctx->type;
+	string type_indicator;
+	if(function_flag)
+	{
+		// treat boolean as integer from here on.
+		type_indicator = (type == Predefined::integer_type) 	? "i"
+	            			: (type == Predefined::real_type)  	? "f"
+	            			: (type == Predefined::boolean_type)   ? "i"
+	            			:                                      "?";
+		jf << "\t" << type_indicator << "load_" << ctx->local_var->get_local_var_array_index() + 1 << endl;
+	}
 
-	// treat boolean as integer from here on.
-	string type_indicator = (type == Predefined::integer_type) 	? "I"
-            			: (type == Predefined::real_type)  		? "F"
-            			: (type == Predefined::boolean_type)   	? "I"
-            			:                                      	"?";
+	else if (function_call_flag)
+	{		// treat boolean as integer from here on.
+		type_indicator = (type == Predefined::integer_type) 	? "I"
+	            			: (type == Predefined::real_type)  	? "F"
+	            			: (type == Predefined::boolean_type)  ? "I"
+	            			:                                     "?";
 
-	// emit the field get instruction.
-	jf << "\tgetstatic\t" << program_name
-	           << "/" << var_name << " " << type_indicator << endl;
+		// emit the field get instruction.
+		jf << "\tputstatic\t" << program_name
+		           << "/" << var_name << " " << type_indicator << endl;
+	}
+
+	else
+	{
+		// treat boolean as integer from here on.
+		type_indicator = (type == Predefined::integer_type) 	? "I"
+	            			: (type == Predefined::real_type)  	? "F"
+	            			: (type == Predefined::boolean_type)  ? "I"
+	            			:                                     "?";
+
+		// emit the field get instruction.
+		jf << "\tgetstatic\t" << program_name
+		           << "/" << var_name << " " << type_indicator << endl;
+
+	}
 
 	return visitChildren(ctx);
 
 }
+
 
 antlrcpp::Any SecondVisitor::visitNumber(VietProgParser::NumberContext *ctx)
 {
@@ -386,6 +511,7 @@ antlrcpp::Any SecondVisitor::visitNumber(VietProgParser::NumberContext *ctx)
 	return value;
 }
 
+
 antlrcpp::Any SecondVisitor::visitIntegerConst(VietProgParser::IntegerConstContext *ctx)
 {
     if (DEBUG_FLAG_2) cout << "Second Visitor: visitIntegerConst(): " + ctx->getText() << endl;
@@ -396,6 +522,7 @@ antlrcpp::Any SecondVisitor::visitIntegerConst(VietProgParser::IntegerConstConte
     return visitChildren(ctx);
 }
 
+
 antlrcpp::Any SecondVisitor::visitFloatConst(VietProgParser::FloatConstContext *ctx)
 {
     if (DEBUG_FLAG_2) cout << "Second Visitor: visitFloatConst(): " + ctx->getText() << endl;
@@ -405,6 +532,7 @@ antlrcpp::Any SecondVisitor::visitFloatConst(VietProgParser::FloatConstContext *
 
     return visitChildren(ctx);
 }
+
 
 antlrcpp::Any SecondVisitor::visitBoolean(VietProgParser::BooleanContext *ctx)
 {
@@ -424,9 +552,10 @@ antlrcpp::Any SecondVisitor::visitBoolean(VietProgParser::BooleanContext *ctx)
 	return visitChildren(ctx);
 }
 
+
 antlrcpp::Any SecondVisitor::visitRelational_Expr(VietProgParser::Relational_ExprContext *ctx)
 {
-	if (DEBUG_FLAG_2) cout << "First Visitor: visitRelational_Expr(): " + ctx->getText() << endl;
+	if (DEBUG_FLAG_2) cout << "Second Visitor: visitRelational_Expr(): " + ctx->getText() << endl;
 	auto value = visitChildren(ctx);
 
 	TypeSpec* type1 = ctx->expr(0)->type;
@@ -503,6 +632,7 @@ antlrcpp::Any SecondVisitor::visitRelational_Expr(VietProgParser::Relational_Exp
 	return value;
 }
 
+
 antlrcpp::Any SecondVisitor::visitIf_statement(VietProgParser::If_statementContext *ctx)
 {
 	if (DEBUG_FLAG_2) cout << "Second Visitor: visitIf_statement(): " + ctx->getText() << endl;
@@ -532,6 +662,7 @@ antlrcpp::Any SecondVisitor::visitIf_statement(VietProgParser::If_statementConte
 
 }
 
+
 antlrcpp::Any SecondVisitor::visitWhen_statement(VietProgParser::When_statementContext *ctx)
 {
 	if (DEBUG_FLAG_2) cout << "Second Visitor: visitWhen_statement(): " + ctx->getText() << endl;
@@ -554,6 +685,7 @@ antlrcpp::Any SecondVisitor::visitWhen_statement(VietProgParser::When_statementC
 	return value;
 }
 
+
 antlrcpp::Any SecondVisitor::visitLoop_statement(VietProgParser::Loop_statementContext *ctx)
 {
 	if (DEBUG_FLAG_2) cout << "Second Visitor: visitLoop_statement(): " + ctx->getText() << endl;
@@ -571,40 +703,179 @@ antlrcpp::Any SecondVisitor::visitLoop_statement(VietProgParser::Loop_statementC
 	return value;
 }
 
+
+antlrcpp::Any SecondVisitor::visitFunction(VietProgParser::FunctionContext *ctx)
+{
+	if (DEBUG_FLAG_2) cout << "Second Visitor: visitFunction(): " << endl;
+
+	local_func_variables.resize(0);
+	function_flag = true;
+
+	string function_name = ctx->function_name()->FUNC_NAME_IDENTIFIER()->toString();
+
+	jf << ".method private static " + function_name + "("; // parameter list will follow.
+
+	auto value = visit(ctx->function_name());
+	if(ctx->parameter_list() != NULL) value = visit(ctx->parameter_list());
+
+	jf << ")"; // closing the parameter list.
+
+	// emit the return type information.
+	string type_letter = "V";
+	if (ctx->type_id() != NULL)
+	{
+		value = visit(ctx->type_id());
+		TypeSpec* type = ctx->type_id()->type;
+		type_letter = (type == Predefined::integer_type)	? "I"
+			 		: (type == Predefined::real_type)		? "F"
+			 		: (type == Predefined::boolean_type) 	? "I"
+			 		: 										"V";
+	}
+
+	// emit the local variables information.
+	print_local_func_variables();
+	jf << function_name << " " <<  type_letter << endl;
+
+	// emit the compound statements of the function.
+	if (ctx->compound_statement() != NULL) value = visit(ctx->compound_statement());
+
+	// emit the return statement
+	if (type_letter == "I")
+	{
+		jf << "\ti";
+	}
+	else if (type_letter == "F")
+	{
+		jf << "\tf";
+	}
+	else if (type_letter == "V")
+	{
+		jf << "\t";
+	}
+
+	jf << "return" << endl << endl;
+	// emit the epilogue
+	emit_function_epilogue();
+
+	// unset the function flag.
+	function_flag = false;
+
+	return value;
+}
+
+
+antlrcpp::Any SecondVisitor::visitType_id(VietProgParser::Type_idContext *ctx)
+{
+	if (DEBUG_FLAG_2) cout << "Second Visitor: visitType_id(): " + ctx->getText() << endl;
+
+	auto value = visitChildren(ctx);
+
+	if(function_flag)
+	{
+		TypeSpec *type = ctx->type;
+
+		string type_letter 	= (type == Predefined::integer_type)		? "I"
+							 	: (type == Predefined::real_type)		? "F"
+							 	: (type == Predefined::boolean_type) 	? "I"
+							 	: 										"V";
+
+		if (type_letter != "V")
+		{
+			jf << type_letter;
+		}
+		else
+		{
+			cout << "Variable of non-standard type: " + ctx->TYPE_IDENTIFIER()->toString() + ", being used in function." << endl;
+		}
+
+	}
+
+	return value;
+}
+
+
+antlrcpp::Any SecondVisitor::visitFunction_return_statement(VietProgParser::Function_return_statementContext *ctx)
+{
+	if (DEBUG_FLAG_2) cout << "Second Visitor: visitFunction_return_statement(): " + ctx->getText() << endl;
+
+	auto value = visitChildren(ctx);
+
+	return value;
+}
+
+
+antlrcpp::Any SecondVisitor::visitFunction_call_statement(VietProgParser::Function_call_statementContext *ctx)
+{
+	if (DEBUG_FLAG_2) cout << "Second Visitor: visitFunction_call_statement(): " + ctx->getText() << endl;
+
+
+	string function_name = ctx->function_name()->FUNC_NAME_IDENTIFIER()->toString();
+	string parameter_type_letters = "";
+	string return_type_letter = "";
+	TypeSpec* type;
+	auto value = 0;
+	int parameter_start_index = 0;
+	if(ctx->EQ_OP() != NULL)
+	{
+		if (DEBUG_FLAG_2) cout << "assignment in function call." << endl;
+		parameter_start_index = 1; // the parameters start from expr(1).
+		// we have an assignment.
+	}
+
+	int parameter_end_index = ctx->expr().size();
+	for (int k = parameter_start_index; k < parameter_end_index; k++)
+	{
+		value = visit(ctx->expr(k));
+		type = ctx->expr(k)->type;
+		string str = "";
+		str = (type == Predefined::integer_type) ? "I"
+					: (type == Predefined::real_type) 	? "F"
+					: (type == Predefined::boolean_type) ? "I"
+					: 									"?";
+		if (str == "?") cout << "Argument of unknown type cannot be accepted in function call: " << endl;
+		else { parameter_type_letters += str; }
+	}
+
+	jf << "\tinvokestatic\t" << program_name << "/" << function_name << "(" << parameter_type_letters << ")";
+
+	type = ctx->function_name()->type;
+	if (type != NULL)
+	{
+		return_type_letter = (type == Predefined::integer_type) ? "I"
+					: (type == Predefined::real_type) 	? "F"
+					: (type == Predefined::boolean_type) ? "I"
+					: 									"?";
+		if (return_type_letter == "?")
+		{
+			cout << "Return type of function: " << function_name <<  ", is unsupported. " << endl;
+			return_type_letter = "V";
+		}
+	}
+	else return_type_letter = "V";
+
+	jf << return_type_letter << endl;
+
+	if ((parameter_start_index == 1) || (ctx->EQ_OP() != NULL))
+	{
+		if (type == ctx->expr(0)->type)
+		{
+			function_call_flag = true;
+			value = visit(ctx->expr(0));
+			function_call_flag = false;
+		}
+
+		else
+		{
+			cout << "The variable's type does not match the type returned by the function. Thus, the value will not be transferred." << endl;
+			jf << "\tpop" << endl;
+		}
+
+
+	}
+
+	jf << endl << endl;
+
+	return value;
+}
+
 // if (DEBUG_FLAG_2) cout << "Second Visitor: visitVar_list(): " + ctx->getText() << endl;
-
-//antlrcpp::Any SecondVisitor::visitFunction(VietProgParser::FunctionContext *ctx)
-//{
-//	// TODO: make relevant changes here when the functions can start to return values.
-//
-//	if (DEBUG_FLAG_2) cout << "First Visitor: visitFunction(): Printing the cross-reference table." << endl;
-//
-//	string function_name = ctx->function_name()->FUNC_NAME_IDENTIFIER()->toString();
-//
-//	jf << ".method private static " + function_name + "("; // parameter list will follow.
-//
-//	auto value = visit(ctx->function_name());
-//
-//	// visit the parameter list node, if there is one.
-//	if(ctx->parameter_list() != NULL)
-//	{
-//		value = visit(ctx->parameter_list());
-//	}
-//
-//	jf << ")" << endl << endl; // close the parameter list
-//
-//	// visit the function's statements, if they exist.
-//	if (ctx->compound_statement() != NULL)
-//	{
-//		value = visit(ctx->compound_statement());
-//	}
-//
-//	jf << "\treturn" << endl;
-//	jf << "\n\n\n.limit stack 32" << endl;
-//	jf << ".limit locals 32" << endl;
-//	jf << ".end method" << endl;
-//	st_stack->pop();
-//
-//	return value;
-//}
-
