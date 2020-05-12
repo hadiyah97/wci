@@ -1,0 +1,33 @@
+batdau thirdprogram:
+
+
+HUDUNG:
+T_integer H_mango, H_banana;
+T_float H_orange, H_peels;
+T_boolean H_lies, H_truth.
+
+viecchinh
+{	
+	H_mango <- 24;
+	INRA ('H_mango bang (24):\t%d\n', H_mango);
+	
+	H_banana <- 0;
+	INRA ('H_banana bang (0):\t%d\n', H_banana);
+
+	H_orange <- 45.0;
+	INRA ('H_orange bang (45.0):\t%f\n', H_orange);
+		
+	H_peels <- H_orange - 1.0;
+	INRA ('H_orange/H_peels bang (1.02):\t%f\n', (H_orange / H_peels));
+
+	H_peels <- H_orange * 90.0;
+	INRA ('H_peels bang (4050.0):\t%f\n', H_peels);
+
+	H_mango <- H_mango + 235;
+	INRA ('H_mango bang (259):\t%d\n', H_mango);
+
+	H_mango <- H_banana + 1;
+	INRA ('H_mango bang (1):\t%d\n', H_mango);
+
+}
+ketthuc

@@ -40,10 +40,9 @@
 	invokenonvirtual PascalTextIn/<init>()V
 	putstatic	secondprogram/_standardIn LPascalTextIn;
 
-; H_mango<--24
+; H_mango<-24
 
 	ldc	24
-	ineg
 	putstatic	secondprogram/H_mango I
 
 ; INRA('H_mango bang (24):\t%d\n',H_mango)
@@ -241,10 +240,10 @@ L003:
 L004:
 
 
-; INRA('H_mango bang (-12):\t%d,\nH_banana bang (0):\t%d,\nH_orange bang (45.0):\t%f,\nH_peels bang (4050.0):\t%f,\nH_lies bang (0):\t%d,\nH_truth bang (1):\t%d.',H_mango,H_banana,H_orange,H_peels,H_lies,H_truth)
+; INRA('H_mango bang (-120):\t%d,\nH_banana bang (0):\t%d,\nH_orange bang (45.0):\t%f,\nH_peels bang (4050.0):\t%f,\nH_lies bang (0):\t%d,\nH_truth bang (1):\t%d.',H_mango,H_banana,H_orange,H_peels,H_lies,H_truth)
 
 	getstatic	java/lang/System/out Ljava/io/PrintStream;
-	ldc	"H_mango bang (-12):\t%d,\nH_banana bang (0):\t%d,\nH_orange bang (45.0):\t%f,\nH_peels bang (4050.0):\t%f,\nH_lies bang (0):\t%d,\nH_truth bang (1):\t%d."
+	ldc	"H_mango bang (-120):\t%d,\nH_banana bang (0):\t%d,\nH_orange bang (45.0):\t%f,\nH_peels bang (4050.0):\t%f,\nH_lies bang (0):\t%d,\nH_truth bang (1):\t%d."
 	ldc	6
 	anewarray	java/lang/Object
 	dup
@@ -350,10 +349,10 @@ L007:
 L008:
 
 
-; INRA('\nH_peels bang (2, 1, 0):\t%f',H_peels)
+; INRA('\nH_peels bang (-1):\t%f',H_peels)
 
 	getstatic	java/lang/System/out Ljava/io/PrintStream;
-	ldc	"\nH_peels bang (2, 1, 0):\t%f"
+	ldc	"\nH_peels bang (-1):\t%f"
 	ldc	1
 	anewarray	java/lang/Object
 	dup

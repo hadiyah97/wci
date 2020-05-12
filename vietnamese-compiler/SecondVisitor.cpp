@@ -51,9 +51,8 @@ void SecondVisitor::print_local_func_variables()
 {
 	string var_name = "";
 	string type_letter = "";
-	int index = -1;
+	int index = 0;
 	TypeSpec* type;
-//	VietProgParser::Var_idContext * itr;
 	for (unsigned int i = 0; i < local_func_variables.size(); i++)
 	{
 		var_name = local_func_variables[i]->VAR_IDENTIFIER()->toString();
@@ -176,10 +175,6 @@ antlrcpp::Any SecondVisitor::visitMain(VietProgParser::MainContext *ctx)
 {
 	if (DEBUG_FLAG_2) cout << "Second Visitor: visitMainBlock(): " << endl;
 
-	// emit the pascal rtl stuff
-	// emit the declarations
-	// emit the class constructor
-
 	// emit the prologue.
 	emit_main_prologue();
 
@@ -277,7 +272,6 @@ antlrcpp::Any SecondVisitor::visitAssignment_statement(VietProgParser::Assignmen
 		// retrieve the local variables array index of the variable.
 		string var_name = ctx->variable()->VAR_IDENTIFIER()->toString();
 		int index = -1;
-		//VietProgParser::Var_idContext * itr;
 		for (unsigned int i = 0; i < local_func_variables.size(); i++)
 		{
 			if (var_name == local_func_variables[i]->VAR_IDENTIFIER()->toString())
@@ -451,7 +445,7 @@ antlrcpp::Any SecondVisitor::visitVariable_Expr(VietProgParser::Variable_ExprCon
 	            			: (type == Predefined::real_type)  	? "f"
 	            			: (type == Predefined::boolean_type)   ? "i"
 	            			:                                      "?";
-		jf << "\t" << type_indicator << "load_" << ctx->local_var->get_local_var_array_index() + 1 << endl;
+		jf << "\t" << type_indicator << "load_" << ctx->local_var->get_local_var_array_index() << endl;
 	}
 
 	else if (function_call_flag)
@@ -461,7 +455,7 @@ antlrcpp::Any SecondVisitor::visitVariable_Expr(VietProgParser::Variable_ExprCon
 	            			: (type == Predefined::boolean_type)  ? "I"
 	            			:                                     "?";
 
-		// emit the field get instruction.
+		// emit the field put instruction.
 		jf << "\tputstatic\t" << program_name
 		           << "/" << var_name << " " << type_indicator << endl;
 	}
@@ -533,21 +527,22 @@ antlrcpp::Any SecondVisitor::visitFloatConst(VietProgParser::FloatConstContext *
     return visitChildren(ctx);
 }
 
-
+// DEPRECATED
 antlrcpp::Any SecondVisitor::visitBoolean(VietProgParser::BooleanContext *ctx)
 {
-	//Note: Because of the new method of treating boolean as integer, this is never visisted.
-	//	if (DEBUG_FLAG_2) cout << "First Visitor: visitBoolean(): " + ctx->getText() << endl;
-	//
-	//	// emit a load instruction depending on value.
-	//	if (ctx->BOOLEAN()->toString() == "true")
-	//	{
-	//		jf << "iconst_1";	// true = 1
-	//	}
-	//	else
-	//	{
-	//		jf << "iconst_0";	// false = 0
-	//	}
+
+/*	Note: Because of the new method of treating boolean as integer, this is never visisted.
+		if (DEBUG_FLAG_2) cout << "First Visitor: visitBoolean(): " + ctx->getText() << endl;
+
+		// emit a load instruction depending on value.
+		if (ctx->BOOLEAN()->toString() == "true")
+		{
+			jf << "iconst_1";	// true = 1
+		}
+		else
+		{
+			jf << "iconst_0";	// false = 0
+		}*/
 
 	return visitChildren(ctx);
 }
@@ -877,5 +872,3 @@ antlrcpp::Any SecondVisitor::visitFunction_call_statement(VietProgParser::Functi
 
 	return value;
 }
-
-// if (DEBUG_FLAG_2) cout << "Second Visitor: visitVar_list(): " + ctx->getText() << endl;

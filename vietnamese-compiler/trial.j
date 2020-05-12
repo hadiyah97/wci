@@ -23,8 +23,8 @@
 .end method
 
 .method private static G_functionName(I)I
-.var 0 is H_firstVariable I
-.var 1 is G_functionName I
+.var 1 is H_firstVariable I
+.var 2 is G_functionName I
 
 ; INRA('Inside the function:')
 
@@ -115,9 +115,7 @@
 
 	ldc	1
 	invokestatic	trial/G_functionName(I)I
-	putstatic	trial/H_mango I
-	return
-	
+	putstatic	trial/H_mango I	
 	
 ; INRA('H_mango bang (0):\t%d',H_mango)
 
