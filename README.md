@@ -19,5 +19,5 @@ Folders with the prefix 'vietnamese-' contain code that incrementally builds a c
 
 ------------------------------
 ##### Upcoming
-- [ ] Hindi Compiler
+- [ ] ~Hindi Compiler~ This is being scratched, because an awesome project similar to this idea already exists, and we don't see the point in replicating it. Check it out here: https://www.kalaam.io/ 
 - [ ] Arabic Compiler
